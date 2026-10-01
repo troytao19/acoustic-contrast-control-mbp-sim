@@ -1,99 +1,169 @@
 # MacBook ACC 3D
+> **AI use disclaimer**: I wrote this simulation software as an experiment for an interest project. AI agents participated extensively in developing the optimization algorithm and the interactive interface, as well as the README.md. Please use and read them with caution. 
 
-An independent local project for single-tone and audio-band acoustic contrast control using the **2021 16-inch MacBook Pro's actual stereo output**. It includes a native Core Audio AUHAL tone generator, a 3D simulator, full MacBook pose controls, and microphone calibration / A/B validation.
+An experimental 3D acoustic contrast control (ACC) app for the **2021 16-inch MacBook Pro**. Define a bright zone and a dark zone, optimize the relative phase and amplitude of the laptop's two speaker channels, and compare optimized audio with an equal-drive baseline through the built-in speakers.
 
-**Physical accuracy is conditional on measurement.** Apple publishes six drivers, but not the acoustic centers, polar responses, crossover transfer functions, or DSP needed for an exact acoustic model. On this Mac, Core Audio reports **two controllable output channels**. Six independent driver controls are not available through the verified public audio interface. The uncalibrated field is explicitly an estimate. No real acoustic contrast has yet been measured.
+The app runs locally with a Python solver, a browser interface, and a native Core Audio playback helper.
 
-## Music and podcast bands
+> **Simulation results are predictions, not measured sound levels.** Speaker locations and radiation patterns are approximate. Microphone calibration and validation are available for single tones; broadband microphone calibration is not implemented. Physical broadband contrast has not been verified.
 
-Full-band design supports **20 Hz–20 kHz**, up to **131,072 taps** (0.336 Hz spacing at 44.1 kHz), bounded-memory transfer calculations, and independent spatial-resolution controls. Use **20 Hz–20 kHz · fine** for a 65,536-tap starting point. Large jobs stream rather than failing the old workload cap; convergence diagnostics distinguish frequency resolution from spatial integration accuracy.
+## Features
 
-The **Program Audio** panel now optimizes phase at each frequency for a whole music or podcast clip. Choose either included sample or upload a WAV, set the band, click **Optimize audio band**, and use the native audio A/B playback buttons. Phase-only and amplitude-plus-phase designs are supported, along with realized-filter validation, integrated 3D fields, frequency plots, and WAV/FIR exports. Both versions play the same band-limited mono program. [Broadband guide and mathematical objective](docs/broadband.md).
+- Interactive 3D room and XY/XZ/YZ field views with editable bright and dark volumes.
+- Adjustable MacBook position, yaw, pitch, and roll; speaker groups remain fixed to the chassis.
+- Configurable room reflections and an optional finite tabletop reflection.
+- Single-tone optimization and frequency-dependent filters for music, speech, or uploaded WAV files.
+- Native stereo playback with optimized/equal-drive comparisons and a Stop control.
+- Single-tone microphone calibration, independent validation measurements, and listening notes.
+- Scene, report, WAV, and FIR-filter exports.
 
-## Start
+## Requirements
 
-Double-click `run.command`, or run:
+- **macOS** for native Core Audio playback. The target hardware is the 2021 16-inch MacBook Pro; other models are not validated.
+- **Python 3.10 or newer**, with NumPy and SciPy from [requirements.txt](requirements.txt).
+- **Apple Command Line Tools** to compile the audio helper. Install them with `xcode-select --install` if needed.
+- A browser with Canvas support. Microphone measurements also require AudioWorklet and permission to access a microphone on localhost.
+- A **movable microphone** for measurements at the listening zones. The laptop's built-in microphone cannot sample remote positions while the laptop stays fixed.
 
-```sh
-cd "/Users/troytao/acoustic contrast control/macbook-acc-3d"
-./run.command
-```
+A microphone is optional for simulation and playback.
 
-Open **http://127.0.0.1:8767**. Run outside Codex's filesystem/process sandbox so Core Audio can enumerate the real device. The server binds only to loopback. Close its Terminal / press Ctrl+C to stop it and playback. The microphone workflow requires a browser supporting localhost microphone access and AudioWorklet (use a normal Chrome or Safari window if the embedded browser cannot grant access).
+## Installation and launch
 
-The launcher compiles the C helper with Apple Command Line Tools, uses its own `.venv` if present, otherwise reuses the adjacent ACC `.venv`. If neither exists it creates a local environment and installs NumPy/SciPy. For a fully independent environment:
+Clone or download this repository, open a terminal in its root directory, then run:
 
 ```sh
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
-./native/build.sh
-.venv/bin/python -m macbook_acc.server
+./run.command
 ```
 
-`--port 8768` and `--no-browser` are supported. No external JS libraries/CDNs or cloud audio services are used.
+The launcher compiles the native helper and opens **http://127.0.0.1:8767/**. Keep the terminal running; press **Ctrl+C** to stop the server and playback. After installation, double-clicking `run.command` also launches the app.
 
-## Your room and stand setup
-
-- Room: **10 × 10 m**. **6 m ceiling is only an editable placeholder**, since “very high” does not establish a height. Wall pressure reflection coefficients are also assumptions, not measured material properties.
-- MacBook center: initially `(5, 5, 1.4)` m. Change its x/y/z coordinates and **yaw, pitch, roll** freely. The rotation convention is `Rz(yaw) Ry(pitch) Rx(roll)`, applied to local coordinates in metres. Local +z points out of the keyboard/top face; local +x points right, +y toward the user/front edge.
-- Sources remain fixed to the MacBook, with estimated effective L/R centers `(±0.15, 0, 0.0168)` m relative to its bottom-plane center. These are **engineering assumptions**, not Apple-measured acoustic centers. Model sound is singularity-softened within 2.5 cm; do not interpret near-source fields literally.
-- Optional horizontal desk: 1 m high, initially **disabled** because you use a stand. Enabling it adds a finite specular reflection. It does **not** simulate acoustic blocking beneath a desk, finite-edge diffraction, stand scattering, or lid/body diffraction. The drawn lid is contextual only.
-- Initial bright/dark volumes are 12 cm cubes above/below the MacBook. Use “Place zones in front / behind top face” after changing orientation. Those volumes remain world-fixed until you explicitly move them.
-- The default radiation model is omnidirectional. Optional broad front-bias patterns are **unmeasured sensitivity assumptions**, not manufacturer polar data. The arrow is a top-face reference, not a certified driver axis.
-
-With the default front/behind setup, the model produces only about **0.66 dB** contrast, essentially the same as equal drive. That is not a meaningful noise-reduction claim. Under reflection-free omnidirectional assumptions, points mirrored across the two-source plane cannot be separated at all: their L/R transfer vectors are identical. Real chassis directivity, diffraction, and reflections may break this symmetry, but only measurement can establish useful improvement. A native front/back level difference must also be distinguished from an improvement caused by ACC.
-
-## A more promising first experiment
-
-The **Try offset front / rear zones** preset moves the bright center 25 cm left and 50 cm out from the top face, and the dark center 25 cm right and 50 cm behind it, in MacBook-local coordinates. With the initial horizontal pose and room assumptions, the model predicts about **19.2 dB** contrast versus **−0.1 dB** equal drive. These are simulation results, not measured hardware performance. The offset breaks the front/back symmetry and is a useful calibration experiment. The main default remains the symmetric geometry so its limitation is visible. A loadable copy is in `examples/offset-front-back.json`.
-
-## Interface
-
-- Orbit/zoom the 3D field; select XY/XZ/YZ sections. Drag a zone on the section to edit its two displayed coordinates; edit full x/y/z centers and volume dimensions numerically. Dashed rectangles indicate zones projected from outside the section plane.
-- Set frequency (80–8,000 Hz), temperature, dimensions, each of six pressure-reflection coefficients, reflection order, control spacing and regularization. Sampling automatically refines to at least six points per wavelength in zone integration, subject to explicit workload limits. Display slices/clouds have fixed resolution and can under-resolve high-frequency fields, especially in Room view; they are not the integration grid.
-- Compare optimized and equal-drive fields on a shared color scale. Values are **relative pressure**, never uncalibrated dB SPL. View bright/dark level changes as well as contrast, since reducing both zones is not a useful outcome by itself.
-- **Play** sends the exact solved complex weights to the native helper, for the displayed optimized/baseline variant. Both variants have unit total squared drive. A shared sample counter produces phase-coherent stereo PCM. Duration is bounded at 30 seconds. Stop, scene edits, closing the page, and server exit stop playback; the native duration deadline also prevents endless sound after a browser failure.
-- Digital peak/gain scales the unit-norm playback vector. Default 0.025; per-channel peak is capped at 0.08. This is not a calibrated acoustic loudness limit. System volume is left unchanged; the app detects mute/zero volume and asks you to set a modest volume and re-solve.
-- Save/load scenes and export solutions, complex weights, measurements, and listening notes. Persistent measurement data live in `data/measurements.json` and are excluded from source control. No microphone recordings leave the browser; only narrowband powers and metadata are stored locally.
-
-## Calibrate the actual field
-
-You need a **movable microphone** at the bright/dark positions. Keeping the laptop stationary is essential. The built-in microphone cannot sample remote points; moving the laptop to move its microphone invalidates the setup. A fixed-gain measurement microphone is preferable. Phone/continuity microphones may apply processing that the browser cannot disable; treat them as exploratory unless stability is established.
-
-1. Set room, MacBook pose, lid/support, zones, frequency, system volume and digital gain. Keep the physical room still. Choose a measurement session name. Start a new session after changing physical setup, gain, microphone, or volume.
-2. Connect the microphone in the browser. Echo cancellation, noise suppression and AGC are requested **off**. Capture is refused if the browser reports these active. Browser settings cannot prove absence of hardware processing; use fixed gain and confirm the checkbox.
-3. Enter the microphone's physical x/y/z coordinate. Select **Training**, choose a zone, and use **Next sample point** to propose positions. Physically move the microphone to each coordinate before clicking **Capture channel calibration**. Capture at least **3 distinct positions in each zone**; 6–12 distributed points per zone is a better initial experiment. Do not normalize or change microphone gain between positions.
-4. The app plays a background interval, L alone, R alone, eight relative phases of L+R, and L again. Default settle/capture times are 1.5 seconds each (~40 seconds per point). For your large high-ceiling room, increase settling if the tone is still changing; compare repeated measurements. It rejects poor SNR, clipping, repeat drift, power fluctuations, and inconsistent phase fits.
-5. Select **Measured calibration points** under optimization. The solver now optimizes the **measured** transfer matrix; it includes the actual chassis, room, support, Apple processing and reflections at those sampled positions. The continuously rendered field is still the geometric approximation, explicitly labeled. We do not fabricate a measured 3D map by interpolating unknown inter-position phase.
-6. Collect additional **Holdout** channel-calibration positions at least 1 cm from training positions. These are excluded from the optimization; their predicted contrast is reported separately.
-7. Freeze the optimized solution. At new holdout positions, click **Measure actual A/B playback**. It records background, equal drive, optimized, optimized repeat, equal-drive repeat. Keep the same microphone and gain across all bright/dark measurements. The actual contrast card aggregates equal-weight unique sampled positions; at least 3 per zone are required before it is labeled sampled verification. This is evidence at samples, not a certificate of uniform volume suppression. Use a dense spatial scan for stronger claims.
-8. If the measured dark zone is poor, add **training** measurements around the failure location and re-optimize, then use fresh holdout locations to avoid tuning to the validation set. Subjective notes are saved but do not alter pressure values automatically.
-
-Calibration is invalidated by frequency, pose, room-model setup, or session changes. Device/sample rate/system volume/mute changes are also checked. Records from incompatible devices are excluded. Microphone identity and digital gain must remain consistent within a session. An unchanged browser label cannot detect manually changed microphone gain: starting a new session remains your responsibility.
-
-Deep nulls below the measured background floor are rejected as unquantifiable; the app does not turn microphone noise into exaggerated contrast. Actual A/B validation compares narrowband powers at the selected frequency, not broadband loudness or harmonic distortion. To claim perceptible improvement, compare both contrast and bright-zone audibility, use repeat trials, and measure multiple spatial positions. A practical experimental target is ≥6 dB measured bright/dark contrast with ≥3 dB gain over equal drive and useful bright-zone level; these are project targets, not psychoacoustic guarantees.
-
-## Numerics and limitations
-
-`H(p,j) = Σ_images r_image D(direction) exp(-ikR)/(4πR)` with `k=2πf/c`, `c=331.3+0.606T`. Room images are truncated by total wall reflection order (0–5). Desk first-bounce reflection is added when its specular point falls on the tabletop. No late diffuse reverberation, frequency-dependent absorption, air absorption, or edge diffraction is included. Finite reflection order is especially approximate for steady tones in reflective halls. Increase order and compare; measured transfer responses are the reliable correction mechanism here.
-
-The optimizer maximizes `qᴴ R_B q / qᴴ (R_D + β·s I) q`, where `R=HᴴH/N`, `s=trace((R_B+R_D)/2)/2`, and `||q||₂=1`. A denser independent model lattice checks zone sampling. Raw contrast is `10 log10(mean|H_B q|² / mean|H_D q|²)`; the regularized objective is not reported as raw acoustic contrast. Training contrast is not validation contrast.
-
-Phase-stepped calibration fits `P(q)=noise+a|qL|²+b|qR|²+2 Re(qL·conj(qR)·c)` for `c=hL·conj(hR)`. Fixing `hL` real positive gives `hR=√b exp(-i arg c)`. A common unknown phase at each spatial point cancels in `HᴴH`, so playback/recording clocks need not synchronize. Per-position amplitude is preserved; fitting must use fixed microphone gain. See [methods](docs/methods.md).
-
-The native AUHAL backend bypasses browser playback, selects the actual built-in speaker device, maps its stereo channels explicitly and uses its current nominal sample rate. It does **not** bypass Apple's internal crossover/protection/EQ, expose six raw DACs, claim exclusive hardware ownership, or stop other apps from playing sound. Pause other audio during calibration. Browser microphone input is separate from the low-level native output path.
-
-The **Program Audio** extension implements frequency-dependent model-based ACC and causal stereo FIR playback for music and podcasts. It does not reuse a single tone vector across the whole recording. The microphone wizard remains single-tone; broadband measured calibration and physical validation remain outstanding. See [the broadband guide](docs/broadband.md).
-
-## Verification
+Optional launch settings:
 
 ```sh
-python -m unittest discover -s tests -v
-./bin/macbook-audio devices
-# Optional native stream check that emits silence on both channels:
-./bin/macbook-audio play 700 0 0 0 0 0.2
+./run.command --port 8768
+./run.command --no-browser
 ```
 
-34 automated tests currently cover 3D propagation, rigid rotations, impossible symmetric front/back separation, image reflections, phase recovery, drift/noise rejection, eigen-solver correctness, calibration invalidation, loopback API controls, measured optimization, actual-measurement aggregation, frequency-band optimization, causal FIR realization, PCM exports, and background-job routing using explicitly synthetic test data in a temporary directory. Integration tests require permission to bind a loopback port. The native stream was opened successfully on the actual MacBook at **44.1 kHz**, with zero-amplitude samples. No actual acoustic or microphone validation was performed.
+Creating the project-local `.venv` as shown above keeps dependencies independent. If it is absent, the launcher also checks for a parent `.venv` before creating its own environment.
 
-See [hardware research](docs/hardware-research.md) for sources and the distinction between verified facts and assumptions.
+No JavaScript packages, CDNs, or cloud audio services are required. The server listens only on `127.0.0.1`.
+
+## Quick start
+
+1. **Set the scene.** Enter the room dimensions and MacBook position and orientation. The initial 10 × 10 × 6 m room, reflection coefficients, and disabled tabletop are example settings—not measurements of your room.
+2. **Place the zones.** Drag them in a section view or edit their centers and dimensions. Start with **Try offset front / rear zones** to break the default front/back symmetry. Zones remain fixed in world coordinates when the MacBook rotates until you reposition them.
+3. **Choose audio.** In **Program Audio**, select a sample or upload a mono/stereo WAV lasting 0.5–30 seconds and no larger than 24 MB.
+4. **Choose a band.** Begin with the default 150–4,000 Hz band, or click **20 Hz–20 kHz · fine** for a full-band design. Choose phase-only or amplitude-plus-phase control.
+5. **Optimize.** Click **Optimize audio band** and wait for the render. Larger jobs report progress and can be cancelled.
+6. **Compare playback.** Use **Play optimized audio** and **Play equal-drive audio** at the same playback gain and system volume. The app leaves system volume unchanged. Compare bright-zone level, dark-zone level, and contrast together.
+7. **Inspect or export.** View the integrated audio field and frequency plot, or export the rendered WAVs, FIR filters, and report.
+
+Stereo input is downmixed to one mono program before separate filters drive the left and right speaker groups. Both playback versions remove content outside the selected band and use a shared normalization. Original stereo imaging is not preserved. Exported WAVs do not include the additional playback-gain setting.
+
+For a single-tone experiment, set **Frequency** in the source panel, click **Optimize contrast**, and open **Single-tone audition and channel weights**.
+
+## Frequency and spatial resolution
+
+Broadband design supports **20 Hz–20 kHz**, subject to the output device's sample rate. A 44.1 or 48 kHz output rate supports the full range; a 32 kHz rate does not. Single-tone controls and microphone measurements use **80–8,000 Hz**.
+
+At a 44.1 kHz output rate:
+
+| FIR taps | Frequency spacing | Shared filter delay |
+| ---: | ---: | ---: |
+| 8,192 | 5.383 Hz | 93 ms |
+| 16,384 | 2.692 Hz | 186 ms |
+| 32,768 | 1.346 Hz | 372 ms |
+| 65,536 | 0.673 Hz | 743 ms |
+| 131,072 | 0.336 Hz | 1,486 ms |
+
+Finer filters take longer to calculate and add playback delay. They do not improve an inaccurate physical model by themselves.
+
+**Volume integration** controls spatial accuracy separately:
+
+- **Auto** uses a wavelength-based grid for smaller jobs and scrambled Sobol samples for larger jobs.
+- **Scrambled Sobol** uses the selected sample count, up to 65,536 points per zone, with independent training and validation sets.
+- **Wavelength grid** retains every grid point and processes them in batches. Large volumes can take much longer to calculate.
+
+The solver processes responses in bounded-memory batches. Review the convergence diagnostics and compare increasing resolutions before relying on a prediction. The displayed field uses a coarser grid and cannot show every local pressure minimum.
+
+See the [broadband guide](docs/broadband.md) for the objective, filter construction, spatial checks, and benchmarks.
+
+## Microphone calibration
+
+This workflow measures **one frequency at a time**. It does not calibrate or validate a whole music or podcast band.
+
+1. Keep the laptop, stand, lid angle, room, system volume, and playback gain fixed. Start a measurement session and connect a movable microphone with stable gain.
+2. Move the microphone to each entered coordinate and capture **Training** channel calibration at at least three distinct positions in each zone. Distribute points throughout the volumes.
+3. Select **Measured calibration points** to optimize using those measurements. The continuous 3D map remains a geometric estimate.
+4. Collect separate **Holdout** positions, then use **Measure actual tone A/B playback** to compare the fixed optimized solution against equal drive. At least three distinct positions per zone are required for sampled verification.
+5. If the result is poor, add training points and re-optimize, then validate at fresh positions. Listening notes are saved but do not automatically change the pressure model.
+
+The app checks clipping, background noise, repeat drift, and reported microphone processing. Start a new session when the physical setup or microphone gain changes. Verification at a few positions does not establish uniform suppression throughout a volume.
+
+See [measurement methods and acceptance checks](docs/methods.md) for the protocol and its limits.
+
+## Hardware and model limitations
+
+The laptop contains six physical drivers, but the tested macOS interface exposes **two controllable output channels**. This app controls the left and right groups; it does not address six independent drivers or bypass Apple's internal crossover, equalization, or protection processing.
+
+The effective source centers at ±15 cm, radiation patterns, and reflection coefficients are modeling assumptions. The model includes truncated image-source reflections and an optional specular tabletop reflection. It omits late diffuse reverberation, frequency-dependent absorption, acoustic shielding, and diffraction from the chassis, lid, tabletop edges, or stand. Field colors are relative levels, not calibrated dB SPL.
+
+With two omnidirectional sources, symmetric points in front of and behind the source plane have identical free-field responses. No stereo weighting can separate those points under that model. The offset preset avoids this symmetry, but useful physical contrast still needs measurement. Supporting a 20 Hz–20 kHz numerical range does not establish usable MacBook speaker output across that range.
+
+See [hardware research and Apple sources](docs/hardware-research.md) for verified specifications and assumptions.
+
+## Project layout and local data
+
+| Location | Contents |
+| --- | --- |
+| `macbook_acc/` | Acoustic model, optimizers, calibration, and HTTP server |
+| `native/` | Core Audio C helper and build script |
+| `web/` | Browser interface |
+| `docs/` | Hardware research, measurement methods, and broadband details |
+| `examples/` | Example scene and numerical checks |
+| `media/` | Sample audio and source metadata |
+| `tests/` | Numerical and local API regression tests |
+| `data/measurements.json` | Local calibration records, validation results, and notes |
+| `data/uploads/` | Uploaded WAV files |
+| `data/broadband/` | Rendered audio, filters, and reports |
+
+Generated data, virtual environments, and compiled binaries are excluded by [.gitignore](.gitignore). Microphone recordings remain in the browser; only derived measurement powers and metadata are sent to the local server. Uploads and renders stay on the machine. Export links refer to recent jobs in the current server session; generated files remain on disk after a restart.
+
+## Tests
+
+From the repository root:
+
+```sh
+.venv/bin/python -m unittest discover -s tests -v
+```
+
+The suite covers propagation, calibration, optimization, full-band transfer accuracy, streamed spatial integration, FIR rendering, and local API behavior. API tests bind a loopback port and use temporary data and mocked audio playback.
+
+To inspect the native device route after building:
+
+```sh
+./bin/macbook-audio devices
+```
+
+Automated tests and successful device access do not substitute for acoustic measurements.
+
+## Troubleshooting
+
+| Problem | What to check |
+| --- | --- |
+| Native helper fails to build | Install Apple Command Line Tools and verify `xcrun clang --version` works. |
+| Missing NumPy or SciPy | Install requirements using `.venv/bin/python -m pip`; use the same environment to launch and test. |
+| Port 8767 is occupied | Launch with `./run.command --port 8768`. |
+| No built-in speaker route | Inspect `./bin/macbook-audio devices`. The helper requires built-in stereo speakers and currently recognizes English speaker names. It does not fall back to headphones or Bluetooth. |
+| Microphone access fails | Grant browser and macOS microphone permission. Try a regular browser window if an embedded browser cannot grant access. |
+| Playback becomes stale | Re-optimize after changing the scene, band, source, device rate, or output settings. |
+| Full-band optimization is slow | Reduce FIR taps or spatial samples for a preview, then increase them and compare convergence. Use **Cancel optimization** to stop the job. |
+| Prediction differs from listening | Check coordinates, pose, volume, and model assumptions. Use single-tone microphone calibration to investigate; broadband physical calibration remains unimplemented. |
+
+## Sample audio and licensing
+
+Sample attribution and source metadata are recorded in [media/sources.json](media/sources.json). The music sample comes from Samplelib; the speech excerpt comes from LibriVox Community Podcast #66. The podcast archive metadata did not specify an item-level license, so the local excerpt should not be assumed cleared for redistribution.
+
+No project software license is currently included. Sample-audio terms are separate from any software license added to the project.
