@@ -1,0 +1,4 @@
+[
+  {"id":"music","name":"Music · flute and drums (12 s)","file":"music.wav","source":"https://samplelib.com/sample-mp3.html","download":"https://samplelib.com/mp3/sample-12s.mp3","credit":"Samplelib — 12-second flute and drum ensemble test sample","license":"Source states no license restrictions; https://samplelib.com/license.html","excerpt_start_seconds":0},
+  {"id":"podcast","name":"Podcast · LibriVox Community #66 (20 s)","file":"podcast.wav","source":"https://archive.org/details/librivox_community_2007","download":"https://archive.org/download/librivox_community_2007/librivox_community_podcast_66_64kb.mp3","credit":"LibriVox Community Podcast #66, December 2007; local test excerpt from the freely downloadable episode","license":"No item-specific license was present in archive metadata; no additional redistribution rights are asserted.","excerpt_start_seconds":60}
+]

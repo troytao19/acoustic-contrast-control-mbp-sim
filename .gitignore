@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+bin/
+data/*.json
+data/*.jsonl
+*.log
+data/broadband/
+data/uploads/

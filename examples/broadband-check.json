@@ -1,0 +1,114 @@
+{
+  "config": {
+    "frequency": 700.0,
+    "temperature": 20.0,
+    "room": [
+      10.0,
+      10.0,
+      6.0
+    ],
+    "reflection": [
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.65,
+      0.45
+    ],
+    "order": 3,
+    "laptop": [
+      5.0,
+      5.0,
+      1.4
+    ],
+    "yaw": 0.0,
+    "pitch": 0.0,
+    "roll": 0.0,
+    "directivity": 0.0,
+    "desk": {
+      "enabled": false,
+      "center": [
+        5.0,
+        5.0
+      ],
+      "height": 1.0,
+      "width": 1.4,
+      "depth": 0.7,
+      "reflection": 0.65
+    },
+    "bright": {
+      "center": [
+        4.75,
+        5,
+        1.9
+      ],
+      "size": [
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "dark": {
+      "center": [
+        5.25,
+        5,
+        0.9
+      ],
+      "size": [
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "spacing": 0.035,
+    "regularization": 0.01,
+    "slice_z": 1.4,
+    "view_span": 2.4,
+    "mode": "model",
+    "session": "session-1"
+  },
+  "band_hz": [
+    150,
+    4000
+  ],
+  "control": "phase",
+  "measured": false,
+  "results": [
+    {
+      "source": "music",
+      "taps": 8192,
+      "contrast_db": 10.103513059062834,
+      "baseline_db": 0.170183516580299,
+      "improvement_db": 9.933329542482536,
+      "input_band_energy_percent": 78.23030435280442,
+      "drive_energy_ratio": 0.9994522637753799
+    },
+    {
+      "source": "music",
+      "taps": 16384,
+      "contrast_db": 10.097480107912443,
+      "baseline_db": 0.13637596823846143,
+      "improvement_db": 9.961104139673981,
+      "input_band_energy_percent": 78.01590137305546,
+      "drive_energy_ratio": 0.999827226999039
+    },
+    {
+      "source": "podcast",
+      "taps": 8192,
+      "contrast_db": 14.435981744826197,
+      "baseline_db": 0.38945968919257046,
+      "improvement_db": 14.046522055633627,
+      "input_band_energy_percent": 97.11077650314742,
+      "drive_energy_ratio": 0.9991390259112055
+    },
+    {
+      "source": "podcast",
+      "taps": 16384,
+      "contrast_db": 14.487160014037562,
+      "baseline_db": 0.39215863831231224,
+      "improvement_db": 14.09500137572525,
+      "input_band_energy_percent": 96.9996937066906,
+      "drive_energy_ratio": 0.9997144524716314
+    }
+  ]
+}

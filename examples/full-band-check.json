@@ -1,0 +1,120 @@
+{
+  "frequency_step_hz": 0.67291259765625,
+  "sampling_counts": [
+    4096,
+    4096,
+    4096,
+    4096
+  ],
+  "spatial_integration": {
+    "methods": [
+      "sobol",
+      "sobol",
+      "sobol",
+      "sobol"
+    ],
+    "points": [
+      4096,
+      4096,
+      4096,
+      4096
+    ],
+    "equivalent_grid_points": [
+      74088,
+      74088,
+      79507,
+      79507
+    ],
+    "training_validation_difference_db": 7.0050214997507965e-06,
+    "transfer_probe_relative_error": 5.091071043011885e-08,
+    "response_batch_points": 4,
+    "half_to_full_validation_difference_db": 1.3761847290183482e-05,
+    "active_bin_difference_p95_db": 0.008210976639694731
+  },
+  "duration": 13.486054421768708,
+  "common_delay_ms": 743.0385487528345,
+  "seconds": 108.83233416599978,
+  "peak_rss_mb": 387.28125,
+  "optimized_db": 9.272219227471142,
+  "baseline_db": 0.10962751973099336,
+  "config": {
+    "frequency": 700.0,
+    "temperature": 20.0,
+    "room": [
+      10.0,
+      10.0,
+      6.0
+    ],
+    "reflection": [
+      0.55,
+      0.55,
+      0.55,
+      0.55,
+      0.65,
+      0.45
+    ],
+    "order": 3,
+    "laptop": [
+      5.0,
+      5.0,
+      1.4
+    ],
+    "yaw": 0.0,
+    "pitch": 0.0,
+    "roll": 0.0,
+    "directivity": 0.0,
+    "desk": {
+      "enabled": false,
+      "center": [
+        5.0,
+        5.0
+      ],
+      "height": 1.0,
+      "width": 1.4,
+      "depth": 0.7,
+      "reflection": 0.65
+    },
+    "bright": {
+      "center": [
+        4.75,
+        5,
+        1.9
+      ],
+      "size": [
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "dark": {
+      "center": [
+        5.25,
+        5,
+        0.9
+      ],
+      "size": [
+        0.12,
+        0.12,
+        0.12
+      ]
+    },
+    "spacing": 0.035,
+    "regularization": 0.01,
+    "slice_z": 1.4,
+    "view_span": 2.4,
+    "mode": "model",
+    "session": "session-1"
+  },
+  "options": {
+    "low": 20,
+    "high": 20000,
+    "fft_size": 65536,
+    "spatial_method": "auto",
+    "spatial_samples": 4096,
+    "control": "phase"
+  },
+  "source": "media/music.wav",
+  "sample_rate": 44100,
+  "measured": false,
+  "includes_3d_field": true
+}
